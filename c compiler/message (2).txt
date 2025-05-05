@@ -1,0 +1,158 @@
+# 3D Healthcare Chat Interface - Design Prompt
+
+## Design Philosophy
+Create a futuristic yet approachable medical interface that combines 3D elements with practical functionality. The design should feel cutting-edge while maintaining medical credibility.
+
+## Visual Language
+
+### Color Palette
+- Primary: 
+  - Medical Blue (#2B4CCF) - For primary actions and key elements
+  - Healing Green (#36B37E) - For success states and progress indicators
+  - Pure White (#FFFFFF) - For backgrounds and text
+- Secondary:
+  - Warm Gray (#F7F9FC) - For cards and containers
+  - Alert Red (#FF5630) - For warnings and emergencies
+- Gradients:
+  - Blue to Purple: `linear-gradient(45deg, #2B4CCF, #7B61FF)`
+  - Green to Blue: `linear-gradient(45deg, #36B37E, #2B4CCF)`
+
+### 3D Elements & Animations
+
+#### Hero Section
+- Floating 3D DNA helix that rotates slowly
+- Morphing medical cross that transforms into a chat bubble
+- Particle system representing data flow with medical icons
+- Depth layers creating parallax effect on scroll
+
+#### Chat Interface
+- 3D bubbles that float up when new messages appear
+- Soft shadows and glass morphism for chat containers
+- Animated pulse effects for typing indicators
+- 3D icons that rotate on hover
+
+#### Medical Models
+- Interactive 3D human body model for symptom selection
+- Floating organs that highlight on selection
+- 3D visualizations of medical concepts
+- Animated transitions between different body systems
+
+## Interface Components
+
+### Navigation
+- Floating 3D action button that expands into menu
+- Glass-morphic bottom navigation bar
+- 3D icons with micro-animations
+- Menu items:
+  - Home
+  - Chat
+  - Health Scan
+  - Profile
+  - Emergency
+
+### Chat Screen
+- 3D message bubbles with depth
+- Floating quick action buttons
+- Voice input with 3D waveform visualization
+- Image upload with 3D preview
+- Features:
+  - Symptom checker with 3D body map
+  - File attachments with 3D preview
+  - Voice notes with visualizer
+  - Emergency button always accessible
+
+### Health Dashboard
+- 3D charts and graphs
+- Interactive health metrics
+- Animated progress rings
+- 3D representations of:
+  - Heart rate
+  - Step count
+  - Sleep patterns
+  - Medication schedule
+
+### Profile Section
+- 3D avatar customization
+- Floating medical history cards
+- Interactive timeline of health events
+- 3D badges for achievements
+
+## Micro-interactions
+- Buttons: Subtle float effect on hover
+- Cards: Tilt effect following cursor
+- Icons: Smooth rotation on state change
+- Loading: 3D medical cross spinning
+- Success: Confetti effect with medical symbols
+- Error: Gentle shake with ripple effect
+
+## Mobile-First Features
+
+### Gesture Controls
+- Swipe between screens
+- Pinch to zoom 3D models
+- Long press for quick actions
+- Two-finger rotate for 3D views
+
+### Responsive Behaviors
+- 3D elements scale based on device
+- Simplified animations for lower-end devices
+- Automatic layout adjustment for different screens
+- Progressive enhancement of 3D features
+
+## Advanced UI Elements
+
+### Emergency Mode
+- Quick-access red floating button
+- One-tap emergency services
+- Location sharing with 3D map
+- Instant emergency contact alerts
+
+### Health Scan Interface
+- Camera viewfinder with AR overlay
+- 3D guidelines for photo positioning
+- Real-time analysis visualization
+- Results with 3D modeling
+
+### Appointment Booking
+- 3D calendar visualization
+- Interactive time selector
+- Doctor profiles with 3D elements
+- Confirmation animations
+
+## Performance Optimizations
+- Progressive loading of 3D elements
+- Reduced animations on low-power mode
+- Lazy loading of complex visualizations
+- Fallbacks for older devices
+
+## Accessibility Features
+- High contrast mode
+- Screen reader optimization
+- Motion reduction option
+- Keyboard navigation support
+
+## Implementation Notes
+
+### 3D Technologies
+- Three.js for 3D rendering
+- GSAP for smooth animations
+- React Three Fiber for React integration
+- WebGL with fallbacks
+
+### Frameworks & Libraries
+- React/Next.js for core application
+- Framer Motion for animations
+- Tailwind CSS for styling
+- Three.js for 3D elements
+
+### Mobile Optimization
+- Touch-friendly interface
+- Performance monitoring
+- Battery usage optimization
+- Offline capabilities
+
+### Security Elements
+- Biometric authentication UI
+- Encryption visualization
+- Secure data indicators
+- Privacy setting controls

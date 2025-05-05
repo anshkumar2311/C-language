@@ -1,0 +1,184 @@
+import React, { useState } from 'react';
+import { Calendar, Clock, MoonStar } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const MoodTracker = () => {
+  const [moodData, setMoodData] = useState([]);
+  const [selectedView, setSelectedView] = useState('weekly');
+
+  // Updated mood options with darker, more vibrant colors
+  const moodOptions = [
+    { value: 'great', label: 'Great! 😄', color: '#22c55e', gradient: 'from-emerald-500 to-emerald-700' },
+    { value: 'good', label: 'Good 🙂', color: '#3b82f6', gradient: 'from-blue-500 to-blue-700' },
+    { value: 'okay', label: 'Okay 😐', color: '#a855f7', gradient: 'from-purple-500 to-purple-700' },
+    { value: 'bad', label: 'Bad 😕', color: '#f97316', gradient: 'from-orange-500 to-orange-700' },
+    { value: 'terrible', label: 'Terrible 😢', color: '#ef4444', gradient: 'from-red-500 to-red-700' }
+  ];
+
+  // Function to add new mood entry
+  const handleMoodSubmit = (mood) => {
+    const newEntry = {
+      date: new Date().toISOString(),
+      mood: mood
+    };
+    setMoodData([...moodData, newEntry]);
+  };
+
+  // Get mood counts for analysis
+  const getMoodCounts = (data) => {
+    return data.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  // Filter data based on time period
+  const getFilteredData = () => {
+    const currentDate = new Date();
+    const filteredData = moodData.filter(entry => {
+      const entryDate = new Date(entry.date);
+      const diffTime = currentDate - entryDate;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (selectedView === 'weekly') return diffDays <= 7;
+      if (selectedView === 'monthly') return diffDays <= 30;
+      return true;
+    });
+    return filteredData;
+  };
+
+  // Calculate mood percentages
+  const calculateMoodPercentages = (counts) => {
+    const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+    return Object.entries(counts).map(([mood, count]) => ({
+      mood,
+      percentage: ((count / total) * 100).toFixed(1)
+    }));
+  };
+
+  const filteredData = getFilteredData();
+  const moodCounts = getMoodCounts(filteredData);
+  const moodPercentages = calculateMoodPercentages(moodCounts);
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* App Header */}
+        <div className="flex items-center gap-2 mb-8">
+          <MoonStar className="w-8 h-8 text-purple-500" />
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Mood Tracker
+          </h1>
+        </div>
+
+        {/* Daily Mood Input */}
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-gray-100">How are you feeling today?</CardTitle>
+            <CardDescription className="text-gray-400">Track your daily mood</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-5 gap-3">
+              {moodOptions.map((mood) => (
+                <button
+                  key={mood.value}
+                  onClick={() => handleMoodSubmit(mood.value)}
+                  className={`p-3 rounded-xl bg-gradient-to-br ${mood.gradient} 
+                    hover:opacity-90 transition-all duration-200 transform hover:scale-105 
+                    shadow-lg hover:shadow-xl hover:shadow-${mood.value}/20`}
+                >
+                  <span className="text-white font-medium">{mood.label}</span>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Mood Analysis */}
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-gray-100">Mood Analysis</CardTitle>
+              <Select value={selectedView} onValueChange={setSelectedView}>
+                <SelectTrigger className="w-32 bg-gray-800 border-gray-700 text-gray-100">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectItem value="weekly" className="text-gray-100 hover:bg-gray-700">Weekly</SelectItem>
+                  <SelectItem value="monthly" className="text-gray-100 hover:bg-gray-700">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {moodPercentages.map(({ mood, percentage }) => {
+                const moodOption = moodOptions.find(m => m.value === mood);
+                return (
+                  <div key={mood} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-300">{moodOption?.label}</span>
+                      <span className="text-gray-300">{percentage}%</span>
+                    </div>
+                    <div className="w-full bg-gray-800 rounded-full h-3">
+                      <div
+                        className={`h-3 rounded-full bg-gradient-to-r ${moodOption?.gradient} 
+                          transition-all duration-500 ease-in-out`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Entries */}
+        <Card className="bg-gray-900 border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-gray-100">Recent Entries</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {filteredData.slice(-5).reverse().map((entry, index) => {
+                const moodOption = moodOptions.find(m => m.value === entry.mood);
+                return (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-xl 
+                      bg-gray-800 border border-gray-700 hover:bg-gray-750 
+                      transition-all duration-200`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-300">
+                        {new Date(entry.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <span className="text-gray-200">{moodOption?.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default MoodTracker;

@@ -1,0 +1,356 @@
+// App.js
+import React, { useState } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  ScrollView, 
+  SafeAreaView,
+  Dimensions
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
+
+const MoodTrackerApp = () => {
+  const [moodData, setMoodData] = useState([]);
+  const [selectedView, setSelectedView] = useState('weekly');
+
+  const moodOptions = [
+    { 
+      value: 'great', 
+      label: 'Great!', 
+      emoji: '😄',
+      colors: ['#22c55e', '#15803d'],
+    },
+    { 
+      value: 'good', 
+      label: 'Good', 
+      emoji: '🙂',
+      colors: ['#3b82f6', '#1d4ed8'],
+    },
+    { 
+      value: 'okay', 
+      label: 'Okay', 
+      emoji: '😐',
+      colors: ['#a855f7', '#7e22ce'],
+    },
+    { 
+      value: 'bad', 
+      label: 'Bad', 
+      emoji: '😕',
+      colors: ['#f97316', '#c2410c'],
+    },
+    { 
+      value: 'terrible', 
+      label: 'Terrible', 
+      emoji: '😢',
+      colors: ['#ef4444', '#b91c1c'],
+    },
+  ];
+
+  const handleMoodSubmit = (mood) => {
+    const newEntry = {
+      date: new Date().toISOString(),
+      mood: mood,
+    };
+    setMoodData([...moodData, newEntry]);
+  };
+
+  const getFilteredData = () => {
+    const currentDate = new Date();
+    return moodData.filter(entry => {
+      const entryDate = new Date(entry.date);
+      const diffTime = currentDate - entryDate;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (selectedView === 'weekly') return diffDays <= 7;
+      if (selectedView === 'monthly') return diffDays <= 30;
+      return true;
+    });
+  };
+
+  const getMoodPercentages = () => {
+    const filteredData = getFilteredData();
+    const counts = filteredData.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {});
+
+    const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+    if (total === 0) return [];
+
+    return Object.entries(counts).map(([mood, count]) => ({
+      mood,
+      percentage: ((count / total) * 100).toFixed(1)
+    }));
+  };
+
+  const MoodButton = ({ mood }) => (
+    <TouchableOpacity
+      style={styles.moodButtonContainer}
+      onPress={() => handleMoodSubmit(mood.value)}
+    >
+      <LinearGradient
+        colors={mood.colors}
+        style={styles.moodButton}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+        <Text style={styles.moodLabel}>{mood.label}</Text>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
+  const ViewToggle = () => (
+    <View style={styles.viewToggle}>
+      {['weekly', 'monthly'].map((view) => (
+        <TouchableOpacity
+          key={view}
+          style={[
+            styles.toggleButton,
+            selectedView === view && styles.toggleButtonActive
+          ]}
+          onPress={() => setSelectedView(view)}
+        >
+          <Text style={[
+            styles.toggleButtonText,
+            selectedView === view && styles.toggleButtonTextActive
+          ]}>
+            {view.charAt(0).toUpperCase() + view.slice(1)}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* Header */}
+        <View style={styles.header}>
+          <MaterialCommunityIcons name="moon-stars" size={32} color="#a855f7" />
+          <Text style={styles.headerTitle}>Mood Tracker</Text>
+        </View>
+
+        {/* Daily Mood Input */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>How are you feeling today?</Text>
+          <Text style={styles.cardSubtitle}>Track your daily mood</Text>
+          <View style={styles.moodGrid}>
+            {moodOptions.map((mood) => (
+              <MoodButton key={mood.value} mood={mood} />
+            ))}
+          </View>
+        </View>
+
+        {/* Mood Analysis */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Mood Analysis</Text>
+            <ViewToggle />
+          </View>
+          <View style={styles.analysisContainer}>
+            {getMoodPercentages().map(({ mood, percentage }) => {
+              const moodOption = moodOptions.find(m => m.value === mood);
+              return (
+                <View key={mood} style={styles.analysisItem}>
+                  <View style={styles.analysisHeader}>
+                    <Text style={styles.analysisLabel}>
+                      {moodOption?.emoji} {moodOption?.label}
+                    </Text>
+                    <Text style={styles.analysisPercentage}>{percentage}%</Text>
+                  </View>
+                  <View style={styles.progressBackground}>
+                    <LinearGradient
+                      colors={moodOption?.colors || ['#333', '#333']}
+                      style={[styles.progressBar, { width: `${percentage}%` }]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Recent Entries */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Recent Entries</Text>
+          <View style={styles.entriesContainer}>
+            {getFilteredData().slice(-5).reverse().map((entry, index) => {
+              const moodOption = moodOptions.find(m => m.value === entry.mood);
+              return (
+                <View key={index} style={styles.entryItem}>
+                  <View style={styles.entryDate}>
+                    <MaterialCommunityIcons 
+                      name="calendar" 
+                      size={16} 
+                      color="#9ca3af" 
+                    />
+                    <Text style={styles.entryDateText}>
+                      {new Date(entry.date).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <Text style={styles.entryMood}>
+                    {moodOption?.emoji} {moodOption?.label}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#09090b',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    gap: 12,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#a855f7',
+  },
+  card: {
+    backgroundColor: '#18181b',
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#27272a',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#71717a',
+    marginBottom: 16,
+  },
+  moodGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  moodButtonContainer: {
+    flex: 1,
+    minWidth: (width - 80) / 3,
+  },
+  moodButton: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  moodEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  moodLabel: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#27272a',
+    borderRadius: 8,
+    padding: 2,
+  },
+  toggleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  toggleButtonActive: {
+    backgroundColor: '#3f3f46',
+  },
+  toggleButtonText: {
+    color: '#a1a1aa',
+    fontSize: 14,
+  },
+  toggleButtonTextActive: {
+    color: '#ffffff',
+  },
+  analysisContainer: {
+    gap: 12,
+  },
+  analysisItem: {
+    gap: 8,
+  },
+  analysisHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  analysisLabel: {
+    color: '#d4d4d8',
+    fontSize: 14,
+  },
+  analysisPercentage: {
+    color: '#d4d4d8',
+    fontSize: 14,
+  },
+  progressBackground: {
+    height: 8,
+    backgroundColor: '#27272a',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  entriesContainer: {
+    gap: 8,
+  },
+  entryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#27272a',
+    borderRadius: 12,
+  },
+  entryDate: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  entryDateText: {
+    color: '#d4d4d8',
+    fontSize: 14,
+  },
+  entryMood: {
+    color: '#ffffff',
+    fontSize: 14,
+  },
+});
+
+export default MoodTrackerApp;
